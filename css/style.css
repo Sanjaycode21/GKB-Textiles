@@ -2050,7 +2050,9 @@ p {
   transform: translateY(-3px) rotate(-90deg);
 }
 
-.title-blocks:last-of-type {
+.title-blocks:last-of-type,
+.title-blocks:last-child,
+.title-blocks ~ .title-blocks {
   transform: translateY(3px) rotate(90deg);
 }
 

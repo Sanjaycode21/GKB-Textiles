@@ -1472,7 +1472,6 @@ p {
 .footer-brand img {
   height: 36px;
   margin-bottom: 1.2rem;
-  filter: brightness(10);
 }
 
 .footer-brand p {

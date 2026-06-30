@@ -2051,6 +2051,10 @@ p {
   transform: rotate(-90deg);
 }
 
+.title-blocks:last-of-type {
+  transform: rotate(90deg);
+}
+
 .title-blocks span {
   width: 8px;
   height: 8px;

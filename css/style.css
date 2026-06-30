@@ -2048,11 +2048,11 @@ p {
   vertical-align: middle;
   margin: 0 18px;
   opacity: 0.9;
-  transform: rotate(-90deg);
+  transform: translateY(-3px) rotate(-90deg);
 }
 
 .title-blocks:last-of-type {
-  transform: rotate(90deg);
+  transform: translateY(3px) rotate(90deg);
 }
 
 .title-blocks span {

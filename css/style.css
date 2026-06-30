@@ -2086,3 +2086,23 @@ p {
   }
 }
 
+/* Darken metrics inside stitched card (cream background) for readability */
+.stitched-card .metric-number {
+  color: var(--indigo-deep) !important;
+}
+
+.stitched-card .metric-label {
+  color: var(--indigo-mid) !important;
+}
+
+.stitched-card .metric-item:not(:last-child)::after {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--indigo-light) 0px,
+    var(--indigo-light) 4px,
+    transparent 4px,
+    transparent 8px
+  ) !important;
+  opacity: 0.3;
+}
+

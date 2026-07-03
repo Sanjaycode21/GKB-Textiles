@@ -1902,9 +1902,34 @@ height: 100%;
     display: none !important;
   }
 
+  .footer-content {
+    padding: 2rem 0 1.5rem;
+  }
+
   .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .footer-brand {
+    grid-column: span 2;
+  }
+
+  .footer-section:last-of-type {
+    grid-column: span 2;
+  }
+
+  .footer-section h4 {
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .footer-section ul li {
+    margin-bottom: 0.4rem;
+  }
+
+  .footer-brand p {
+    margin-bottom: 0.8rem;
   }
 
   .footer-bottom {

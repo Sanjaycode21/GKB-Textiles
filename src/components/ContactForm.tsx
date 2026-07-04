@@ -12,6 +12,7 @@ export default function ContactForm() {
   });
   
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -24,10 +25,23 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
+    setErrorMessage('');
     
-    // Simulate API request
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message.');
+      }
+
       setStatus('success');
       setFormData({
         fullName: '',
@@ -36,14 +50,15 @@ export default function ContactForm() {
         subject: '',
         message: ''
       });
-    } catch (err) {
+    } catch (err: any) {
+      setErrorMessage(err.message || 'An unexpected error occurred. Please try again.');
       setStatus('error');
     }
   };
 
   if (status === 'success') {
     return (
-      <div className="form-stitched fade-in-left flex-center" style={{ minHeight: '400px', flexDirection: 'column', textAlign: 'center' }}>
+      <div className="form-stitched fade-in-left visible flex-center" style={{ minHeight: '400px', flexDirection: 'column', textAlign: 'center' }}>
         <div style={{
           width: '64px',
           height: '64px',
@@ -153,6 +168,22 @@ export default function ContactForm() {
           ></textarea>
         </div>
         
+        {status === 'error' && (
+          <div style={{
+            color: '#721c24',
+            backgroundColor: '#f8d7da',
+            borderColor: '#f5c6cb',
+            padding: '12px 16px',
+            borderRadius: '6px',
+            marginBottom: '1.5rem',
+            fontSize: '0.95rem',
+            border: '1px solid #f5c6cb',
+            textAlign: 'left'
+          }}>
+            {errorMessage || 'Failed to send message. Please try again later.'}
+          </div>
+        )}
+        
         <button 
           type="submit" 
           className="btn btn-primary"
@@ -201,13 +232,6 @@ export default function ContactForm() {
           )}
         </button>
       </form>
-      
-      <style jsx global>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

@@ -21,10 +21,34 @@ export default function AdminContactsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchContacts();
   }, []);
+
+  const handleDeleteSubmit = async () => {
+    if (deleteId === null) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/contacts?id=${deleteId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        throw new Error('Failed to delete contact submission.');
+      }
+      setContacts((prev) => prev.filter((item) => item.id !== deleteId));
+      if (selectedContact?.id === deleteId) {
+        setSelectedContact(null);
+      }
+      setDeleteId(null);
+    } catch (err: any) {
+      alert(err.message || 'An error occurred while deleting.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const fetchContacts = async () => {
     setLoading(true);
@@ -364,8 +388,40 @@ export default function AdminContactsPage() {
                   {contact.message}
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--indigo-mid)', textDecoration: 'underline' }}>
-                  {selectedContact?.id === contact.id ? 'Click to collapse message' : 'Click to read full message'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8rem' }}>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteId(contact.id);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#dc2626',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      transition: 'all 0.2s ease',
+                    }}
+                    className="delete-btn"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                    Delete
+                  </button>
+
+                  <div style={{ fontSize: '0.8rem', color: 'var(--indigo-mid)', textDecoration: 'underline' }}>
+                    {selectedContact?.id === contact.id ? 'Click to collapse message' : 'Click to read full message'}
+                  </div>
                 </div>
               </div>
             ))}
@@ -378,8 +434,100 @@ export default function AdminContactsPage() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        .delete-btn:hover {
+          background-color: rgba(220, 38, 38, 0.08) !important;
+          color: #b91c1c !important;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
       `}</style>
     </main>
+
+    {/* ===== DELETE CONFIRMATION MODAL ===== */}
+    {deleteId !== null && (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundColor: 'rgba(11, 36, 71, 0.5)',
+        backdropFilter: 'blur(4px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        animation: 'fadeIn 0.25s ease'
+      }}>
+        <div style={{
+          backgroundColor: 'var(--white, #ffffff)',
+          borderRadius: '12px',
+          border: '1px solid var(--indigo-pale, #e2e8f0)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          width: '90%',
+          maxWidth: '440px',
+          padding: '2.2rem 2rem',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '56px',
+            height: '56px',
+            borderRadius: '50%',
+            backgroundColor: '#fee2e2',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 1.5rem',
+            color: '#ef4444'
+          }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </div>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--indigo-deep, #0b2447)', marginBottom: '0.75rem', fontFamily: 'var(--font-heading, serif)' }}>
+            Confirm Delete
+          </h3>
+          <p style={{ color: 'var(--charcoal-light, #64748b)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+            Are you sure you want to delete this contact submission? This action will permanently remove this record from your database and cannot be undone.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button 
+              onClick={() => setDeleteId(null)}
+              disabled={isDeleting}
+              className="btn btn-outline-dark"
+              style={{
+                height: '42px',
+                padding: '0 20px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleDeleteSubmit}
+              disabled={isDeleting}
+              className="btn btn-primary"
+              style={{
+                height: '42px',
+                padding: '0 20px',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                backgroundColor: '#dc2626',
+                borderColor: '#dc2626',
+                color: '#ffffff',
+                cursor: 'pointer',
+                opacity: isDeleting ? 0.7 : 1
+              }}
+            >
+              {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 }

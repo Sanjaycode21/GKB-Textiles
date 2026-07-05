@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import ThreadDivider from '@/components/ThreadDivider';
+import SustainabilityCards from '@/components/SustainabilityCards';
 
 export const metadata: Metadata = {
   title: 'Sustainability at GKB Textiles | Solar Energy & Eco-Friendly Manufacturing',
@@ -116,51 +117,7 @@ export default function SustainabilityPage() {
             <p className="section-subtitle">Committed to reducing our environmental footprint through technology and innovation.</p>
           </div>
 
-          <div className="grid-3 stagger-children">
-            {/* Solar Panel Energy */}
-            <div className="feature-card fade-in">
-              <div className="feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              </div>
-              <h3>Solar Panel Energy</h3>
-              <p>Our 100 kW Solar Power Plant contributes approximately 22% of daily energy requirements, significantly reducing conventional energy consumption and lowering our carbon footprint. With an average daily consumption of 2,200 kWh, solar energy plays a vital role in our manufacturing operations.</p>
-            </div>
-
-            {/* Air Jet Technology */}
-            <div className="feature-card fade-in">
-              <div className="feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2" />
-                  <path d="M12.59 19.41A2 2 0 1 0 14 16H2" />
-                  <path d="M17.73 7.73A2.5 2.5 0 1 1 19.5 12H2" />
-                </svg>
-              </div>
-              <h3>Air Jet Fibre Technology</h3>
-              <p>Our 14 Picanol OmniPlus 800 Air Jet Looms use compressed air instead of traditional shuttle mechanisms, resulting in lower energy consumption per metre of fabric, reduced noise pollution, and more efficient yarn utilization with minimal waste generation.</p>
-            </div>
-
-            {/* Eco-Friendly Fibres */}
-            <div className="feature-card fade-in">
-              <div className="feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />
-                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
-                </svg>
-              </div>
-              <h3>Eco-Friendly Fibres</h3>
-              <p>We work with natural cotton fibres including compact, combed, and carded yarns. Our focus on cotton-based fabrics supports biodegradable end products. We continuously explore sustainable yarn options and responsible sourcing practices.</p>
-            </div>
-          </div>
+          <SustainabilityCards />
         </div>
       </section>
 

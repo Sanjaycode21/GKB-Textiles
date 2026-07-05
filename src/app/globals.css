@@ -968,10 +968,33 @@ height: 100%;
   padding-left: 3rem;
 }
 
+.timeline-start-logo {
+  position: absolute;
+  top: -52px;
+  left: -3px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 2px solid var(--gold-thread);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  z-index: 2;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all var(--ease-base);
+}
+
+.timeline-start-logo:hover {
+  transform: scale(1.15) rotate(5deg);
+  border-color: var(--navy);
+}
+
 .timeline-vertical::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: -40px;
   left: 14px;
   bottom: 0;
   width: 2px;

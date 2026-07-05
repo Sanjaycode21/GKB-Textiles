@@ -236,7 +236,16 @@ export default function AboutPage() {
             <p className="section-subtitle">From humble beginnings to advanced manufacturing excellence.</p>
           </div>
 
-          <div className="timeline-vertical stagger-children">
+          <div className="timeline-vertical stagger-children" style={{ marginTop: '3.5rem' }}>
+            <div className="timeline-start-logo fade-in">
+              <Image 
+                src="/images/logo-transparent.png" 
+                alt="GKB Textiles Logo" 
+                width={26} 
+                height={26} 
+                style={{ objectFit: 'contain' }}
+              />
+            </div>
             <div className="timeline-item fade-in">
               <span className="year">2005</span>
               <p className="event">Started operations with Rapier Shuttleless Loom technology.</p>

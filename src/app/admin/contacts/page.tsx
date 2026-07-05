@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ThreadDivider from '@/components/ThreadDivider';
@@ -386,5 +388,6 @@ export default function AdminContactsPage() {
         }
       `}</style>
     </main>
+    </>
   );
 }

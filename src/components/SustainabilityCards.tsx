@@ -83,7 +83,7 @@ function Card({ title, description, imageUrl, icon }: CardProps) {
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: `url(${imageUrl})`,
+          backgroundImage: `url("${imageUrl}")`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           transition: 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -139,7 +139,7 @@ export default function SustainabilityCards() {
     {
       title: "Solar Panel Energy",
       description: "Our 100 kW Solar Power Plant contributes approximately 22% of daily energy requirements, significantly reducing conventional energy consumption and lowering our carbon footprint. With an average daily consumption of 2,200 kWh, solar energy plays a vital role in our manufacturing operations.",
-      imageUrl: "https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=600&q=80",
+      imageUrl: "/images/sustainability-solar.png",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="5" />
@@ -157,7 +157,7 @@ export default function SustainabilityCards() {
     {
       title: "Air Jet Fibre Technology",
       description: "Our 14 Picanol OmniPlus 800 Air Jet Looms use compressed air instead of traditional shuttle mechanisms, resulting in lower energy consumption per metre of fabric, reduced noise pollution, and more efficient yarn utilization with minimal waste generation.",
-      imageUrl: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=600&q=80",
+      imageUrl: "/images/sustainability-airjet.png",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9.59 4.59A2 2 0 1 1 11 8H2" />
@@ -169,7 +169,7 @@ export default function SustainabilityCards() {
     {
       title: "Eco-Friendly Fibres",
       description: "We work with natural cotton fibres including compact, combed, and carded yarns. Our focus on cotton-based fabrics supports biodegradable end products. We continuously explore sustainable yarn options and responsible sourcing practices.",
-      imageUrl: "https://images.unsplash.com/photo-1594488651883-29114777c97e?auto=format&fit=crop&w=600&q=80",
+      imageUrl: "/images/sustainability-cotton.png",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z" />

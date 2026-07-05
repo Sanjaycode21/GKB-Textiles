@@ -204,29 +204,29 @@ export default function AdminContactsPage() {
           </div>
 
           {/* Stats Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-            <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: 'var(--white, #ffffff)', borderRadius: '6px', border: '1px solid var(--indigo-pale, #e2e8f0)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+          <div className="admin-stats-grid">
+            <div className="admin-card" style={{ textAlign: 'center' }}>
               <h4 style={{ color: 'var(--indigo-light, #94a3b8)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Total Inquiries</h4>
               <span style={{ fontSize: '2.2rem', fontWeight: 'bold', color: 'var(--indigo-deep, #1e3a8a)', fontFamily: 'var(--font-heading, serif)' }}>{totalCount}</span>
             </div>
-            <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: 'var(--white, #ffffff)', borderRadius: '6px', border: '1px solid var(--indigo-pale, #e2e8f0)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+            <div className="admin-card" style={{ textAlign: 'center' }}>
               <h4 style={{ color: 'var(--indigo-light, #94a3b8)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Export Orders</h4>
               <span style={{ fontSize: '2.2rem', fontWeight: 'bold', color: 'var(--indigo-deep, #1e3a8a)', fontFamily: 'var(--font-heading, serif)' }}>{exportCount}</span>
             </div>
-            <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: 'var(--white, #ffffff)', borderRadius: '6px', border: '1px solid var(--indigo-pale, #e2e8f0)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+            <div className="admin-card" style={{ textAlign: 'center' }}>
               <h4 style={{ color: 'var(--indigo-light, #94a3b8)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Bulk Inquiries</h4>
               <span style={{ fontSize: '2.2rem', fontWeight: 'bold', color: 'var(--indigo-deep, #1e3a8a)', fontFamily: 'var(--font-heading, serif)' }}>{bulkCount}</span>
             </div>
-            <div style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: 'var(--white, #ffffff)', borderRadius: '6px', border: '1px solid var(--indigo-pale, #e2e8f0)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+            <div className="admin-card" style={{ textAlign: 'center' }}>
               <h4 style={{ color: 'var(--indigo-light, #94a3b8)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Fabric Dev</h4>
               <span style={{ fontSize: '2.2rem', fontWeight: 'bold', color: 'var(--indigo-deep, #1e3a8a)', fontFamily: 'var(--font-heading, serif)' }}>{devCount}</span>
             </div>
           </div>
 
           {/* Search & Filter Bar */}
-          <div style={{ padding: '1.8rem', backgroundColor: 'var(--white, #ffffff)', borderRadius: '6px', border: '1px solid var(--indigo-pale, #e2e8f0)', marginBottom: '2rem', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div className="admin-card" style={{ marginBottom: '2rem' }}>
+            <div className="admin-filter-bar">
+              <div className="admin-filter-search">
                 <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--indigo-deep)' }}>Search Inquiries</label>
                 <div style={{ position: 'relative' }}>
                   <input 
@@ -241,37 +241,37 @@ export default function AdminContactsPage() {
                     style={{ position: 'absolute', left: '14px', top: '16px', color: 'var(--indigo-light)' }}
                     xmlns="http://www.w3.org/2000/svg" 
                     width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="admin-filter-select">
+                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--indigo-deep)' }}>Filter by Subject</label>
+                <select 
+                  className="form-input"
+                  style={{ height: '48px', border: '1px solid var(--indigo-pale)', borderRadius: '4px', backgroundColor: 'var(--white)' }}
+                  value={subjectFilter}
+                  onChange={(e) => setSubjectFilter(e.target.value)}
                 >
-                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
+                  <option value="all">All Categories</option>
+                  <option value="general">General Enquiry</option>
+                  <option value="fabric-development">Fabric Development</option>
+                  <option value="export">Export Enquiry</option>
+                  <option value="bulk-order">Bulk Order</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
             </div>
-
-            <div style={{ flex: '0 1 240px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--indigo-deep)' }}>Filter by Subject</label>
-              <select 
-                className="form-input"
-                style={{ height: '48px', border: '1px solid var(--indigo-pale)', borderRadius: '4px', backgroundColor: 'var(--white)' }}
-                value={subjectFilter}
-                onChange={(e) => setSubjectFilter(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                <option value="general">General Enquiry</option>
-                <option value="fabric-development">Fabric Development</option>
-                <option value="export">Export Enquiry</option>
-                <option value="bulk-order">Bulk Order</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
           </div>
-        </div>
 
         {/* main table or grid */}
         {error && (
@@ -299,19 +299,11 @@ export default function AdminContactsPage() {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+          <div className="admin-inquiries-list">
             {filteredContacts.map((contact) => (
               <div 
                 key={contact.id} 
-                style={{ 
-                  backgroundColor: 'var(--white)',
-                  padding: '1.5rem',
-                  transition: 'all 0.2s ease',
-                  cursor: 'pointer',
-                  borderRadius: '6px',
-                  border: selectedContact?.id === contact.id ? '2px solid var(--sage)' : '1px solid var(--indigo-pale, #e2e8f0)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.01)'
-                }}
+                className={`admin-inquiry-card ${selectedContact?.id === contact.id ? 'selected' : ''}`}
                 onClick={() => setSelectedContact(selectedContact?.id === contact.id ? null : contact)}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>

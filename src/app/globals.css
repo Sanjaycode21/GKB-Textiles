@@ -2277,3 +2277,89 @@ height: 100%;
   color: var(--indigo-mid) !important;
 }
 
+/* === ADMIN CONSOLE RESPONSIVE STYLES === */
+.admin-card {
+  background-color: var(--white, #ffffff);
+  border: 1px solid var(--indigo-pale, #e2e8f0);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  padding: 1.8rem;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .admin-card {
+    padding: 1.2rem;
+  }
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 992px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.admin-filter-bar {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-filter-search {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-filter-select {
+  flex: 0 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (max-width: 576px) {
+  .admin-filter-search,
+  .admin-filter-select {
+    flex: 1 1 100% !important;
+  }
+}
+
+.admin-inquiries-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.admin-inquiry-card {
+  background-color: var(--white, #ffffff);
+  border: 1px solid var(--indigo-pale, #e2e8f0);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.admin-inquiry-card.selected {
+  border: 2px solid var(--sage) !important;
+}
+

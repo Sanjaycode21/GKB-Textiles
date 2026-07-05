@@ -146,7 +146,7 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="form-stitched fade-in-left">
+    <div className="form-stitched fade-in-left visible">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="full-name">Full Name</label>

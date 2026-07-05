@@ -111,7 +111,7 @@ export default function ContactPage() {
                 </div>
                 <div className="info-text">
                   <h4>General Enquiries</h4>
-                  <p>gkbtextiles@gmail.com</p>
+                  <p>gkbtextilesindia@gmail.com</p>
                 </div>
               </div>
 

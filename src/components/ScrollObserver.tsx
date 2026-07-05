@@ -68,6 +68,7 @@ export default function ScrollObserver() {
       const prefix = el.getAttribute('data-prefix') || '';
       const duration = 2000;
       let start: number | null = null;
+      let lastVal = -1;
 
       function update(currentTime: number) {
         if (start === null) start = currentTime;
@@ -76,7 +77,10 @@ export default function ScrollObserver() {
         const eased = 1 - Math.pow(1 - progress, 3);
         const current = Math.round(eased * target);
 
-        el.textContent = prefix + current.toLocaleString() + suffix;
+        if (current !== lastVal) {
+          el.textContent = prefix + current.toLocaleString() + suffix;
+          lastVal = current;
+        }
 
         if (progress < 1) {
           requestAnimationFrame(update);

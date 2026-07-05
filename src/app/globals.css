@@ -1311,6 +1311,8 @@ height: 100%;
   color: var(--gold-thread);
   line-height: 1;
   margin-bottom: 0.5rem;
+  display: block;
+  font-variant-numeric: tabular-nums;
 }
 
 .metric-item .metric-label {

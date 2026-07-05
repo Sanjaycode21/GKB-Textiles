@@ -85,13 +85,6 @@ export default function SustainabilityPage() {
         </div>
         <div className="hero-overlay"></div>
         
-        {/* Decorative Logo Blocks Grid */}
-        <div className="card-blocks-grid" aria-hidden="true">
-          <span className="b-light"></span><span className="b-navy"></span>
-          <span className="b-mid"></span><span className="b-pale"></span>
-          <span className="b-empty"></span><span className="b-navy"></span>
-          <span className="b-empty"></span><span className="b-navy"></span>
-        </div>
 
         <div className="hero-content center">
           <span className="hero-tagline">Sustainability</span>

@@ -2512,3 +2512,19 @@ height: 100%;
   box-shadow: 0 12px 30px rgba(11, 36, 71, 0.08) !important;
 }
 
+/* === RESPONSIVE CONTACT FORM BUTTONS === */
+.contact-form-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .contact-form-buttons {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+

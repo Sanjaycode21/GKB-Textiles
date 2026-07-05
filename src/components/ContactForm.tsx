@@ -242,7 +242,7 @@ export default function ContactForm() {
           </div>
         )}
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '1.5rem', width: '100%' }}>
+        <div className="contact-form-buttons">
           <button 
             type="submit" 
             className="btn btn-primary"

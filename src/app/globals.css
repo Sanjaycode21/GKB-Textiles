@@ -1184,6 +1184,10 @@ height: 100%;
   height: 100%;
 }
 
+.value-item h3 {
+  margin-bottom: 0.8rem;
+}
+
 .value-item h4 {
   font-size: 1rem;
   margin-bottom: 0.4rem;

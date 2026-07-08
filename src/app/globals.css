@@ -58,6 +58,29 @@
   --nav-height: 80px;
 }
 
+/* === RESPONSIVE CONTAINER VALUES FOR WIDE MONITORS === */
+@media (min-width: 1400px) {
+  :root {
+    --container-max: 1320px;
+    --section-px: 3rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --container-max: 1520px;
+    --section-px: 4rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --container-max: 1760px;
+    --section-px: 5rem;
+  }
+}
+
+
 
 /* === RESET & BASE === */
 *,

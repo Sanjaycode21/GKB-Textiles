@@ -97,6 +97,28 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Scaling up all typography proportionally on desktop screens */
+@media (min-width: 1024px) {
+  html {
+    font-size: 16.5px;
+  }
+}
+@media (min-width: 1400px) {
+  html {
+    font-size: 17px;
+  }
+}
+@media (min-width: 1600px) {
+  html {
+    font-size: 17.5px;
+  }
+}
+@media (min-width: 1920px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 body {
   font-family: var(--font-body);
   font-weight: 400;
@@ -617,12 +639,13 @@ height: 100%;
 /* === HERO SECTIONS === */
 .hero {
   position: relative;
-  min-height: 85vh;
+  min-height: 90vh; /* Increased from 85vh to make the top section bigger on desktop */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   padding-top: var(--nav-height);
+  padding-bottom: 4rem; /* Additional bottom padding for breathing room */
 }
 
 .hero-bg {
@@ -659,7 +682,7 @@ height: 100%;
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 750px;
+  max-width: 860px; /* Increased from 750px to stretch content wider on desktop screens */
   padding: 0 var(--section-px);
 }
 
@@ -695,11 +718,27 @@ height: 100%;
   font-weight: 700;
 }
 
+@media (min-width: 1024px) {
+  .hero h1 {
+    font-size: clamp(2.8rem, 5.5vw, 4.3rem); /* Make main headline larger on desktop viewports */
+    line-height: 1.2;
+  }
+}
+
 .hero-description {
   font-size: 1.15rem;
   line-height: 1.9;
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  .hero-description {
+    font-size: 1.25rem; /* Larger font size on desktop screens */
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .hero-buttons {

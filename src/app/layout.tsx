@@ -66,7 +66,7 @@ export const metadata: Metadata = {
         url: 'https://gkbtextiles.vercel.app/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'GKB Textiles Logo & Brand Preview',
+        alt: 'GKB Textiles Logo',
         type: 'image/png',
       },
       {
@@ -161,7 +161,7 @@ export default function RootLayout({
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="GKB Textiles Logo & Brand Preview" />
+        <meta property="og:image:alt" content="GKB Textiles Logo" />
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="GKB Textiles | Premium Cotton Grey Fabric Manufacturer" />

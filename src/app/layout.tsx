@@ -18,8 +18,12 @@ const inter = Inter({
   display: 'swap',
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://gkbtextiles.vercel.app'));
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://gkb-textiles.vercel.app'),
+  metadataBase: new URL(baseUrl),
   title: {
     default: 'GKB Textiles | Premium Cotton Grey Fabric Manufacturer | Erode, Tamil Nadu',
     template: '%s | GKB Textiles'
@@ -55,14 +59,22 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GKB Textiles | Premium Cotton Grey Fabric Manufacturer | Erode',
     description: 'Leading cotton grey fabric manufacturer in Erode, Tamil Nadu. Specialized in dobby fabrics, double cloth, and seersucker using Picanol Air Jet Looms.',
-    url: 'https://gkb-textiles.vercel.app',
+    url: 'https://gkbtextiles.vercel.app',
     siteName: 'GKB Textiles',
     images: [
       {
-        url: '/images/hero-home-landscape.png',
+        url: 'https://gkbtextiles.vercel.app/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'GKB Textiles Weaving Factory',
+        alt: 'GKB Textiles Logo & Brand Preview',
+        type: 'image/png',
+      },
+      {
+        url: 'https://gkbtextiles.vercel.app/images/logo.png',
+        width: 1024,
+        height: 409,
+        alt: 'GKB Textiles Logo',
+        type: 'image/png',
       },
     ],
     locale: 'en_US',
@@ -72,7 +84,16 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'GKB Textiles | Premium Cotton Grey Fabric Manufacturer',
     description: 'Premium Cotton Grey Fabrics manufactured using advanced Picanol Air Jet Loom technology in Erode, India.',
-    images: ['/images/hero-home-landscape.png'],
+    images: ['https://gkbtextiles.vercel.app/og-image.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon.png', type: 'image/png' },
+    ],
   },
 };
 
@@ -86,17 +107,17 @@ export default function RootLayout({
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://gkb-textiles.vercel.app/#organization",
+        "@id": "https://gkbtextiles.vercel.app/#organization",
         "name": "GKB Textiles",
-        "url": "https://gkb-textiles.vercel.app",
+        "url": "https://gkbtextiles.vercel.app",
         "logo": {
           "@type": "ImageObject",
-          "@id": "https://gkb-textiles.vercel.app/#logo",
-          "url": "https://gkb-textiles.vercel.app/images/logo.png",
+          "@id": "https://gkbtextiles.vercel.app/#logo",
+          "url": "https://gkbtextiles.vercel.app/images/logo.png",
           "caption": "GKB Textiles Logo"
         },
         "image": {
-          "@id": "https://gkb-textiles.vercel.app/#logo"
+          "@id": "https://gkbtextiles.vercel.app/#logo"
         },
         "sameAs": [
           "https://www.linkedin.com/company/gkb-textiles"
@@ -104,9 +125,9 @@ export default function RootLayout({
       },
       {
         "@type": "LocalBusiness",
-        "@id": "https://gkb-textiles.vercel.app/#localbusiness",
+        "@id": "https://gkbtextiles.vercel.app/#localbusiness",
         "name": "GKB Textiles",
-        "image": "https://gkb-textiles.vercel.app/images/hero-home-landscape.png",
+        "image": "https://gkbtextiles.vercel.app/og-image.png",
         "telephone": "+91-9080157410",
         "email": "gkbbalu@gmail.com",
         "address": {
@@ -122,7 +143,7 @@ export default function RootLayout({
           "latitude": "11.341036",
           "longitude": "77.56372"
         },
-        "url": "https://gkb-textiles.vercel.app",
+        "url": "https://gkbtextiles.vercel.app",
         "priceRange": "$$"
       }
     ]
@@ -131,6 +152,22 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
+        <meta property="og:title" content="GKB Textiles | Premium Cotton Grey Fabric Manufacturer | Erode" />
+        <meta property="og:description" content="Leading cotton grey fabric manufacturer in Erode, Tamil Nadu. Specialized in dobby fabrics, double cloth, and seersucker using Picanol Air Jet Looms." />
+        <meta property="og:url" content="https://gkbtextiles.vercel.app" />
+        <meta property="og:site_name" content="GKB Textiles" />
+        <meta property="og:image" content="https://gkbtextiles.vercel.app/og-image.png" />
+        <meta property="og:image:secure_url" content="https://gkbtextiles.vercel.app/og-image.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="GKB Textiles Logo & Brand Preview" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="GKB Textiles | Premium Cotton Grey Fabric Manufacturer" />
+        <meta name="twitter:description" content="Premium Cotton Grey Fabrics manufactured using advanced Picanol Air Jet Loom technology in Erode, India." />
+        <meta name="twitter:image" content="https://gkbtextiles.vercel.app/og-image.png" />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

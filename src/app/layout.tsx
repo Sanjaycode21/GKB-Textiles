@@ -69,13 +69,6 @@ export const metadata: Metadata = {
         alt: 'GKB Textiles Logo',
         type: 'image/png',
       },
-      {
-        url: 'https://gkbtextiles.vercel.app/images/logo.png',
-        width: 1024,
-        height: 409,
-        alt: 'GKB Textiles Logo',
-        type: 'image/png',
-      },
     ],
     locale: 'en_US',
     type: 'website',
@@ -152,22 +145,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
-        <meta property="og:title" content="GKB Textiles | Premium Cotton Grey Fabric Manufacturer | Erode" />
-        <meta property="og:description" content="Leading cotton grey fabric manufacturer in Erode, Tamil Nadu. Specialized in dobby fabrics, double cloth, and seersucker using Picanol Air Jet Looms." />
-        <meta property="og:url" content="https://gkbtextiles.vercel.app" />
-        <meta property="og:site_name" content="GKB Textiles" />
-        <meta property="og:image" content="https://gkbtextiles.vercel.app/og-image.png" />
-        <meta property="og:image:secure_url" content="https://gkbtextiles.vercel.app/og-image.png" />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="GKB Textiles Logo" />
-
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="GKB Textiles | Premium Cotton Grey Fabric Manufacturer" />
-        <meta name="twitter:description" content="Premium Cotton Grey Fabrics manufactured using advanced Picanol Air Jet Loom technology in Erode, India." />
-        <meta name="twitter:image" content="https://gkbtextiles.vercel.app/og-image.png" />
-
+        <link rel="image_src" href="https://gkbtextiles.vercel.app/og-image.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

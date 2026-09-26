@@ -63,11 +63,11 @@ export const metadata: Metadata = {
     siteName: 'GKB Textiles',
     images: [
       {
-        url: 'https://gkbtextiles.vercel.app/og-image.png',
+        url: 'https://gkbtextiles.vercel.app/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'GKB Textiles Logo',
-        type: 'image/png',
+        type: 'image/jpeg',
       },
     ],
     locale: 'en_US',
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'GKB Textiles | Premium Cotton Grey Fabric Manufacturer',
     description: 'Premium Cotton Grey Fabrics manufactured using advanced Picanol Air Jet Loom technology in Erode, India.',
-    images: ['https://gkbtextiles.vercel.app/og-image.png'],
+    images: ['https://gkbtextiles.vercel.app/og-image.jpg'],
   },
   icons: {
     icon: [
@@ -120,7 +120,7 @@ export default function RootLayout({
         "@type": "LocalBusiness",
         "@id": "https://gkbtextiles.vercel.app/#localbusiness",
         "name": "GKB Textiles",
-        "image": "https://gkbtextiles.vercel.app/og-image.png",
+        "image": "https://gkbtextiles.vercel.app/og-image.jpg",
         "telephone": "+91-9080157410",
         "email": "gkbbalu@gmail.com",
         "address": {
@@ -145,7 +145,20 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <head>
-        <link rel="image_src" href="https://gkbtextiles.vercel.app/og-image.png" />
+        <meta property="og:image" content="https://gkbtextiles.vercel.app/og-image.jpg" />
+        <meta property="og:image:url" content="https://gkbtextiles.vercel.app/og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://gkbtextiles.vercel.app/og-image.jpg" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="GKB Textiles Logo" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://gkbtextiles.vercel.app/og-image.jpg" />
+
+        <link rel="image_src" href="https://gkbtextiles.vercel.app/og-image.jpg" />
+        <link rel="apple-touch-icon" href="https://gkbtextiles.vercel.app/og-square.jpg" />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

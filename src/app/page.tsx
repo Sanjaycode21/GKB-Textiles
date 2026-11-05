@@ -18,7 +18,7 @@ export default function HomePage() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://gkb-textiles.vercel.app"
+        "item": "https://gkbtextiles.vercel.app"
       }
     ]
   };
@@ -28,7 +28,7 @@ export default function HomePage() {
     "@type": "Service",
     "name": "Cotton Grey Fabric Weaving",
     "provider": {
-      "@id": "https://gkb-textiles.vercel.app/#organization"
+      "@id": "https://gkbtextiles.vercel.app/#organization"
     },
     "description": "High-quality woven fabric manufacturing including dobby patterns, plain/twill weaves, double cloth constructions, and seersucker fabrics using Picanol OmniPlus 800 Air Jet looms in Erode, Tamil Nadu.",
     "areaServed": {

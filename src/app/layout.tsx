@@ -18,9 +18,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://gkbtextiles.vercel.app'));
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://gkbtextiles.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

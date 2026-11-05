@@ -19,13 +19,13 @@ export default function SustainabilityPage() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://gkb-textiles.vercel.app"
+        "item": "https://gkbtextiles.vercel.app"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Sustainability",
-        "item": "https://gkb-textiles.vercel.app/sustainability"
+        "item": "https://gkbtextiles.vercel.app/sustainability"
       }
     ]
   };

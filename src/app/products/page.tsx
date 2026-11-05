@@ -18,13 +18,13 @@ export default function ProductsPage() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://gkb-textiles.vercel.app"
+        "item": "https://gkbtextiles.vercel.app"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Products",
-        "item": "https://gkb-textiles.vercel.app/products"
+        "item": "https://gkbtextiles.vercel.app/products"
       }
     ]
   };

@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://gkb-textiles.vercel.app/sitemap.xml',
+    sitemap: 'https://gkbtextiles.vercel.app/sitemap.xml',
   };
 }

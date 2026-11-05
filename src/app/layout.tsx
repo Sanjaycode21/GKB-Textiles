@@ -88,6 +88,9 @@ export const metadata: Metadata = {
       { url: '/icon.png', type: 'image/png' },
     ],
   },
+  verification: {
+    google: 'dkFxXQME_SrqK4oEa1IcWK6xokPAxKtwgMjvyaX6uuQ',
+  },
 };
 
 export default function RootLayout({

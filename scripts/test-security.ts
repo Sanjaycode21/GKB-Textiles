@@ -52,7 +52,7 @@ async function runSecurityTests() {
 
   const superAdminUser: User = {
     ...baseUser,
-    id: 'usr-super',
+    id: 1,
     email: 'owner@gkbtextiles.com',
     name: 'Owner',
     role: Role.SUPER_ADMIN,
@@ -67,7 +67,7 @@ async function runSecurityTests() {
 
   const supportAdminUser: User = {
     ...baseUser,
-    id: 'usr-support',
+    id: 2,
     email: 'zockle@agency.com',
     name: 'Support Team',
     role: Role.SUPPORT_ADMIN,
@@ -82,7 +82,7 @@ async function runSecurityTests() {
 
   const staffAdminUser: User = {
     ...baseUser,
-    id: 'usr-staff',
+    id: 3,
     email: 'staff@gkbtextiles.com',
     name: 'Staff Member',
     role: Role.ADMIN,
@@ -133,7 +133,7 @@ async function runSecurityTests() {
   assert(supportModifyingOwner.allowed === false, 'SUPPORT_ADMIN cannot delete Business Owner');
 
   // SUPPORT_ADMIN attempting to modify another SUPPORT_ADMIN
-  const supportModifyingPeer = canManageTargetUser(supportAdminUser, { ...supportAdminUser, id: 'peer' }, 'edit');
+  const supportModifyingPeer = canManageTargetUser(supportAdminUser, { ...supportAdminUser, id: 99 }, 'edit');
   assert(supportModifyingPeer.allowed === false, 'SUPPORT_ADMIN cannot edit other administrators');
 
   // SUPER_ADMIN deleting self

@@ -24,25 +24,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Message content is required.' }, { status: 400 });
     }
 
-    // Insert into database
-    const contact = await prisma.contact.create({
-      data: {
-        fullName: fullName.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone ? phone.trim() : null,
-        subject: subject.trim(),
-        message: message.trim(),
-      },
-    });
+    // 1. Attempt Database Insertion (Graceful fallback if database is paused or unreachable)
+    let contactId: number | null = null;
+    let dbSaved = false;
 
-    // Send email notification (either SMTP/Gmail or Resend)
+    try {
+      const contact = await prisma.contact.create({
+        data: {
+          fullName: fullName.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone ? phone.trim() : null,
+          subject: subject.trim(),
+          message: message.trim(),
+        },
+      });
+      contactId = contact.id;
+      dbSaved = true;
+      console.log(`[Contact API] Inquiry successfully saved to database with ID: ${contact.id}`);
+    } catch (dbError: any) {
+      console.error('[Contact API] Failed to save inquiry to database (Database may be paused or unreachable):', dbError?.message || dbError);
+    }
+
+    // 2. Send email notification (either SMTP/Gmail or Resend)
     const resendApiKey = process.env.RESEND_API_KEY;
     const smtpUser = process.env.SMTP_USER;
     const smtpPassword = process.env.SMTP_PASSWORD;
-    const toEmail = process.env.RESEND_TO_EMAIL || process.env.SMTP_TO || 'gkbbalu@gmail.com';
+    const targetRecipient = process.env.RESEND_TO_EMAIL || process.env.SMTP_TO || 'gkbbalu@gmail.com';
+    let emailSent = false;
 
     // Dynamic public logo URL resolution
-    const host = request.headers.get('host') || 'gkb-textiles-mu.vercel.app';
+    const host = request.headers.get('host') || 'gkbtextiles.vercel.app';
     const protocol = host.includes('localhost') ? 'http' : 'https';
     const logoUrl = `${protocol}://${host}/images/logo-transparent.png`;
 
@@ -82,12 +93,12 @@ export async function POST(request: Request) {
         
         <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 11px; color: #94a3b8; text-align: center;">
           <p style="margin: 0;">This is an automated notification from your GKB Textiles website.</p>
-          <p style="margin: 4px 0 0 0;">Manage your inquiries at <a href="https://gkb-textiles-mu.vercel.app/admin/contacts" style="color: #2563eb; text-decoration: none;">Admin Console</a>.</p>
+          <p style="margin: 4px 0 0 0;">Manage your inquiries at <a href="https://gkbtextiles.vercel.app/admin/contacts" style="color: #2563eb; text-decoration: none;">Admin Console</a>.</p>
         </div>
       </div>
     `;
 
-    // 1. Try SMTP/Gmail if SMTP credentials are provided
+    // A. Try SMTP/Gmail if SMTP credentials are provided
     if (smtpUser && smtpPassword) {
       try {
         const transporter = nodemailer.createTransport({
@@ -100,16 +111,17 @@ export async function POST(request: Request) {
 
         await transporter.sendMail({
           from: `"GKB Textiles Website" <${smtpUser}>`,
-          to: toEmail,
+          to: targetRecipient,
           subject: emailSubject,
           html: emailHtml,
         });
-        console.log('SMTP email notification sent successfully.');
+        emailSent = true;
+        console.log('[Contact API] SMTP email notification sent successfully to:', targetRecipient);
       } catch (smtpError) {
-        console.error('Failed to send SMTP email notification:', smtpError);
+        console.error('[Contact API] Failed to send SMTP email notification:', smtpError);
       }
     }
-    // 2. Fallback to Resend API if RESEND_API_KEY is provided
+    // B. Fallback to Resend API if RESEND_API_KEY is provided
     else if (resendApiKey) {
       try {
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'GKB Textiles Contact Form <onboarding@resend.dev>';
@@ -122,31 +134,67 @@ export async function POST(request: Request) {
           },
           body: JSON.stringify({
             from: fromEmail,
-            to: [toEmail],
+            to: [targetRecipient],
             subject: emailSubject,
             html: emailHtml,
           }),
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('Resend API error:', response.status, errorData);
+        if (response.ok) {
+          emailSent = true;
+          console.log('[Contact API] Resend email notification sent successfully to:', targetRecipient);
         } else {
-          console.log('Resend email notification sent successfully.');
+          const errorData = await response.json().catch(() => ({}));
+          console.warn('[Contact API] Resend dispatch to target recipient returned status:', response.status, errorData);
+
+          // If Resend rejected because of domain verification restriction (testing domain can only send to account owner email)
+          if (response.status === 403 && errorData?.message?.includes('testing emails')) {
+            const fallbackEmail = 'sanjaycode21@gmail.com';
+            console.log(`[Contact API] Attempting fallback to verified account email (${fallbackEmail})...`);
+            
+            const fallbackRes = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${resendApiKey}`,
+              },
+              body: JSON.stringify({
+                from: fromEmail,
+                to: [fallbackEmail],
+                subject: `[FORWARDED TO OWNER] ${emailSubject}`,
+                html: `
+                  <div style="background-color: #fef2f2; border: 1px solid #f87171; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; color: #991b1b;">
+                    <strong>Notice:</strong> This inquiry was routed to your verified Resend email because sandbox mode only permits sending to account owners. To deliver directly to <code>${targetRecipient}</code>, add and verify your custom domain in the Resend dashboard.
+                  </div>
+                  ${emailHtml}
+                `,
+              }),
+            });
+
+            if (fallbackRes.ok) {
+              emailSent = true;
+              console.log('[Contact API] Fallback inquiry notification dispatched successfully to:', fallbackEmail);
+            }
+          }
         }
       } catch (resendError) {
-        console.error('Failed to send Resend email notification:', resendError);
+        console.error('[Contact API] Failed to send Resend email notification:', resendError);
       }
-    } else {
-      console.warn('Neither SMTP credentials (SMTP_USER/SMTP_PASSWORD) nor RESEND_API_KEY are configured. Skipping email notification.');
     }
 
+    // 3. Evaluate Result: If EITHER the database saved OR an email notification was dispatched, succeed
+    if (dbSaved || emailSent) {
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Inquiry received successfully! Our team will get back to you shortly.', 
+        data: { id: contactId, savedToDatabase: dbSaved, emailNotified: emailSent } 
+      }, { status: 200 });
+    }
 
+    // 4. If both DB and email failed completely, return a clear actionable error
     return NextResponse.json({ 
-      success: true, 
-      message: 'Inquiry saved successfully!', 
-      data: { id: contact.id } 
-    }, { status: 200 });
+      error: 'Our messaging server is currently experiencing high load. Please connect with us directly via WhatsApp or phone.' 
+    }, { status: 500 });
 
   } catch (error: any) {
     console.error('Error saving contact inquiry:', error);

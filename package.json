@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint",
     "seed:admin": "npx tsx scripts/create-super-admin.ts",
-    "test:security": "npx tsx scripts/test-security.ts"
+    "test:security": "npx tsx scripts/test-security.ts",
+    "test:neon": "npx tsx scripts/verify-neon-e2e.ts"
   },
   "dependencies": {
+    "@neon/config": "^1.11.3",
+    "@neon/env": "^1.6.15",
     "next": "16.2.10",
     "nodemailer": "^9.0.3",
     "react": "19.2.4",

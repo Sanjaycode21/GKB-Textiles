@@ -1,8 +1,17 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // Do not render the public site footer on admin portal pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
   return (
     <footer className="main-footer">
       <div className="footer-woven-border"></div>

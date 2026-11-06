@@ -7,6 +7,12 @@ import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const pathname = usePathname();
+
+  // Do not render the public site navbar on admin portal pages
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);

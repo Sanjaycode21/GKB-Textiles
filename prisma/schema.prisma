@@ -19,3 +19,105 @@ model Contact {
 
   @@map("contacts")
 }
+
+enum Role {
+  SUPER_ADMIN
+  SUPPORT_ADMIN
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  DISABLED
+}
+
+model User {
+  id                   Int          @id @default(autoincrement())
+  email                String       @unique
+  passwordHash         String?      @map("password_hash")
+  name                 String
+  role                 Role         @default(ADMIN)
+  status               UserStatus   @default(ACTIVE)
+  
+  // Granular permissions
+  canManageInquiries   Boolean      @default(true) @map("can_manage_inquiries")
+  canDeleteInquiries   Boolean      @default(false) @map("can_delete_inquiries")
+  canExportInquiries   Boolean      @default(true) @map("can_export_inquiries")
+  canManageUsers       Boolean      @default(false) @map("can_manage_users")
+  canViewAuditLogs     Boolean      @default(false) @map("can_view_audit_logs")
+  
+  // Two-factor authentication (email OTP or TOTP)
+  twoFactorEnabled     Boolean      @default(false) @map("two_factor_enabled")
+  twoFactorSecret      String?      @map("two_factor_secret")
+  twoFactorCode        String?      @map("two_factor_code")
+  twoFactorExpiresAt   DateTime?    @map("two_factor_expires_at")
+  
+  // Brute force & security tracking
+  failedLoginAttempts  Int          @default(0) @map("failed_login_attempts")
+  lockoutUntil         DateTime?    @map("lockout_until")
+  lastLoginAt          DateTime?    @map("last_login_at")
+  lastLoginIp          String?      @map("last_login_ip")
+  
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+
+  sessions             Session[]
+  auditLogs            AuditLog[]
+  invitationsCreated   Invitation[] @relation("InvitedBy")
+
+  @@map("admin_users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admin_sessions")
+}
+
+model Invitation {
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  name        String
+  role        Role       @default(ADMIN)
+  token       String     @unique
+  expiresAt   DateTime   @map("expires_at")
+  invitedById Int        @map("invited_by_id")
+  invitedBy   User       @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+  acceptedAt  DateTime?  @map("accepted_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  @@map("admin_invitations")
+}
+
+model PasswordReset {
+  id        Int       @id @default(autoincrement())
+  email     String
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("admin_password_resets")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userEmail String   @map("user_email")
+  action    String
+  details   String?
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admin_audit_logs")
+}

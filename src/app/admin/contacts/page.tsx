@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ThreadDivider from '@/components/ThreadDivider';
+import AdminNav, { AdminUser } from '@/components/admin/AdminNav';
 
 interface Contact {
   id: number;
@@ -15,6 +16,7 @@ interface Contact {
 }
 
 export default function AdminContactsPage() {
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,28 +27,34 @@ export default function AdminContactsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    fetchContacts();
+    fetchMeAndContacts();
   }, []);
 
-  const handleDeleteSubmit = async () => {
-    if (deleteId === null) return;
-    setIsDeleting(true);
+  const fetchMeAndContacts = async () => {
+    setLoading(true);
+    setError('');
     try {
-      const res = await fetch(`/api/admin/contacts?id=${deleteId}`, {
-        method: 'DELETE',
-      });
+      // 1. Fetch authenticated administrator profile & permissions
+      const meRes = await fetch('/api/admin/auth/me');
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        setCurrentUser(meData.user);
+      }
+
+      // 2. Fetch contacts
+      const res = await fetch('/api/admin/contacts');
       if (!res.ok) {
-        throw new Error('Failed to delete contact submission.');
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('Authentication required: Please sign in with an authorized account.');
+        }
+        throw new Error('Failed to load contact submissions.');
       }
-      setContacts((prev) => prev.filter((item) => item.id !== deleteId));
-      if (selectedContact?.id === deleteId) {
-        setSelectedContact(null);
-      }
-      setDeleteId(null);
+      const data = await res.json();
+      setContacts(data);
     } catch (err: any) {
-      alert(err.message || 'An error occurred while deleting.');
+      setError(err.message || 'An error occurred while loading database data.');
     } finally {
-      setIsDeleting(false);
+      setLoading(false);
     }
   };
 
@@ -64,6 +72,29 @@ export default function AdminContactsPage() {
       setError(err.message || 'An error occurred while loading database data.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteSubmit = async () => {
+    if (deleteId === null) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/contacts?id=${deleteId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to delete contact submission.');
+      }
+      setContacts((prev) => prev.filter((item) => item.id !== deleteId));
+      if (selectedContact?.id === deleteId) {
+        setSelectedContact(null);
+      }
+      setDeleteId(null);
+    } catch (err: any) {
+      alert(err.message || 'An error occurred while deleting.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -88,7 +119,7 @@ export default function AdminContactsPage() {
 
   // Export to CSV helper
   const exportToCSV = () => {
-    if (filteredContacts.length === 0) return;
+    if (filteredContacts.length === 0 || !currentUser?.canExportInquiries) return;
     
     const headers = ['ID', 'Full Name', 'Email', 'Phone', 'Subject', 'Message', 'Submitted At'];
     const rows = filteredContacts.map(c => [
@@ -119,33 +150,32 @@ export default function AdminContactsPage() {
       case 'fabric-development': return 'Fabric Dev';
       case 'export': return 'Export';
       case 'bulk-order': return 'Bulk Order';
+      case 'custom-weave': return 'Custom Weave';
+      case 'visit': return 'Mill Visit';
       default: return subject;
     }
   };
 
-  const getSubjectBadgeStyle = (subject: string) => {
+  const getSubjectBadgeClass = (subject: string) => {
     switch (subject) {
-      case 'export':
-        return { backgroundColor: 'rgba(22, 48, 87, 0.1)', color: 'var(--indigo-deep)', border: '1px solid var(--indigo-pale)' };
-      case 'bulk-order':
-        return { backgroundColor: 'rgba(154, 179, 205, 0.2)', color: '#1a3a60', border: '1px solid var(--gold-thread)' };
-      case 'fabric-development':
-        return { backgroundColor: 'var(--sage-pale)', color: 'var(--sage-dark)', border: '1px solid var(--sage-light)' };
-      default:
-        return { backgroundColor: '#f3f4f6', color: '#4b5563', border: '1px solid #d1d5db' };
+      case 'export': return 'badge-export';
+      case 'bulk-order': return 'badge-bulk';
+      case 'fabric-development': return 'badge-dev';
+      default: return 'badge-general';
     }
   };
 
   return (
     <>
-      {/* ============================================= */}
-      {/* PAGE HERO                                     */}
-      {/* ============================================= */}
-      <section className="hero hero-page">
+      {/* Role-Based Admin Navigation Header */}
+      <AdminNav currentUser={currentUser} />
+
+      {/* Hero Section */}
+      <section className="hero hero-page" style={{ minHeight: '260px', padding: '3.5rem 0 2.5rem' }}>
         <div className="hero-bg">
           <Image 
             src="/images/thread-spools.jpg" 
-            alt="Admin console background showing fabric weaving details" 
+            alt="White thread spools loaded on creel at GKB Textiles factory in Erode" 
             fill
             priority
             sizes="100vw"
@@ -155,23 +185,28 @@ export default function AdminContactsPage() {
         <div className="hero-overlay"></div>
         
         <div className="hero-content center">
-          <span className="hero-tagline">Admin Console</span>
-          <h1>Contact Database</h1>
-          <p className="hero-description">Secure, local database inquiries from the GKB Textiles Contact Us form.</p>
+          <span className="hero-tagline">Admin Portal</span>
+          <h1>Inquiries Management</h1>
+          <p className="hero-description">Secure contact submissions from domestic buyers and global export partners.</p>
         </div>
       </section>
 
       {/* Thread Divider */}
       <ThreadDivider />
 
-      <main style={{ minHeight: 'calc(100vh - var(--nav-height))', padding: '4rem 0', backgroundColor: 'var(--cream, #fbf9f6)' }}>
+      <main style={{ minHeight: 'calc(100vh - var(--nav-height))', padding: '3rem 0 4rem', backgroundColor: 'var(--cream, #fbf9f6)' }}>
         <div className="container">
           
           {/* Header Action Bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.5rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading, serif)', color: 'var(--indigo-deep, #1e3a8a)', fontSize: '1.8rem', margin: 0 }}>
-              Inquiries Management
-            </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-heading, serif)', color: 'var(--indigo-deep, #1e3a8a)', fontSize: '1.75rem', margin: '0 0 0.25rem' }}>
+                Contact Submissions
+              </h2>
+              <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
+                {currentUser ? `Signed in as ${currentUser.name} (${currentUser.role})` : 'Authorized session'}
+              </span>
+            </div>
             
             <div style={{ display: 'flex', gap: '0.8rem' }}>
               <button 
@@ -188,42 +223,26 @@ export default function AdminContactsPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></svg>
                 Refresh
               </button>
-              <button 
-                onClick={exportToCSV}
-                disabled={filteredContacts.length === 0}
-                className="btn btn-primary"
-                style={{ 
-                  padding: '10px 18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  height: '44px',
-                  opacity: filteredContacts.length === 0 ? 0.6 : 1,
-                  cursor: filteredContacts.length === 0 ? 'not-allowed' : 'pointer'
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                Export CSV
-              </button>
-            </div>
-          </div>
 
-          {/* Warning Alert about Database Location */}
-          <div style={{
-            backgroundColor: '#fffbeb',
-            border: '1px solid #fef3c7',
-            borderRadius: '6px',
-            padding: '1rem',
-            marginBottom: '2.5rem',
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'center',
-            color: '#b45309',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-          }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
-            <div style={{ fontSize: '0.85rem', lineHeight: '1.4' }}>
-              <strong>Dev Note:</strong> This database is connected directly to your hosted **Supabase** instance. Submissions are persistent. Ensure that you secure this admin dashboard route using authentication before deploying to a public production URL.
+              {currentUser?.canExportInquiries && (
+                <button 
+                  onClick={exportToCSV}
+                  disabled={filteredContacts.length === 0}
+                  className="btn btn-primary"
+                  style={{ 
+                    padding: '10px 18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    height: '44px',
+                    opacity: filteredContacts.length === 0 ? 0.6 : 1,
+                    cursor: filteredContacts.length === 0 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                  Export CSV
+                </button>
+              )}
             </div>
           </div>
 
@@ -248,286 +267,320 @@ export default function AdminContactsPage() {
           </div>
 
           {/* Search & Filter Bar */}
-          <div className="admin-card" style={{ marginBottom: '2rem' }}>
-            <div className="admin-filter-bar">
-              <div className="admin-filter-search">
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--indigo-deep)' }}>Search Inquiries</label>
-                <div style={{ position: 'relative' }}>
-                  <input 
-                    type="text" 
-                    placeholder="Search name, email, phone, or message contents..." 
-                    className="form-input"
-                    style={{ width: '100%', paddingLeft: '40px', height: '48px', border: '1px solid var(--indigo-pale)', borderRadius: '4px' }}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <svg 
-                    style={{ position: 'absolute', left: '14px', top: '16px', color: 'var(--indigo-light)' }}
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                </div>
-              </div>
-
-              <div className="admin-filter-select">
-                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--indigo-deep)' }}>Filter by Subject</label>
-                <select 
-                  className="form-input"
-                  style={{ height: '48px', border: '1px solid var(--indigo-pale)', borderRadius: '4px', backgroundColor: 'var(--white)' }}
-                  value={subjectFilter}
-                  onChange={(e) => setSubjectFilter(e.target.value)}
-                >
-                  <option value="all">All Categories</option>
-                  <option value="general">General Enquiry</option>
-                  <option value="fabric-development">Fabric Development</option>
-                  <option value="export">Export Enquiry</option>
-                  <option value="bulk-order">Bulk Order</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-        {/* main table or grid */}
-        {error && (
-          <div style={{ color: '#721c24', backgroundColor: '#f8d7da', padding: '2rem', textAlign: 'center', borderRadius: '6px', border: '1px solid #f5c6cb' }}>
-            <p>{error}</p>
-            <button onClick={fetchContacts} className="btn btn-primary" style={{ marginTop: '1rem' }}>Try Again</button>
-          </div>
-        )}
-
-        {loading ? (
-          <div style={{ padding: '4rem', textAlign: 'center', backgroundColor: 'var(--white)', borderRadius: '6px', border: '1px solid var(--indigo-pale)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-            <div style={{ display: 'inline-block', width: '40px', height: '40px', border: '3px solid var(--indigo-pale)', borderTopColor: 'var(--indigo-deep)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-            <p style={{ marginTop: '1rem', color: 'var(--charcoal-light)' }}>Connecting to Supabase Database...</p>
-          </div>
-        ) : filteredContacts.length === 0 ? (
-          <div className="flex-center" style={{ minHeight: '300px', flexDirection: 'column', textAlign: 'center', backgroundColor: 'var(--white)', borderRadius: '6px', border: '1px solid var(--indigo-pale)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)', padding: '2rem' }}>
-            <div style={{ color: 'var(--indigo-pale)', marginBottom: '1.5rem' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M12 4v16M2 12h20" /></svg>
-            </div>
-            <h3 style={{ color: 'var(--indigo-deep)' }}>No Inquiries Found</h3>
-            <p style={{ color: 'var(--charcoal-light)', maxWidth: '400px', margin: '0.5rem auto 0' }}>
-              {contacts.length === 0 
-                ? "You haven't received any contact inquiries yet. Submit a message on the Contact page to test!"
-                : "No inquiries match your current search queries or subject filter settings."}
-            </p>
-          </div>
-        ) : (
-          <div className="admin-inquiries-list">
-            {filteredContacts.map((contact) => (
-              <div 
-                key={contact.id} 
-                className={`admin-inquiry-card ${selectedContact?.id === contact.id ? 'selected' : ''}`}
-                onClick={() => setSelectedContact(selectedContact?.id === contact.id ? null : contact)}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '2rem',
+            backgroundColor: 'var(--white, #ffffff)',
+            padding: '1.2rem',
+            borderRadius: '8px',
+            border: '1px solid var(--indigo-pale, #e2e8f0)',
+            boxShadow: 'var(--shadow-soft)'
+          }}>
+            <div style={{ position: 'relative', flex: '1 1 300px' }}>
+              <input 
+                type="text"
+                placeholder="Search by name, email, phone or message..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px 10px 40px',
+                  borderRadius: '6px',
+                  border: '1px solid var(--indigo-pale, #cbd5e1)',
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--indigo-light, #94a3b8)' }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1.2rem', color: 'var(--indigo-deep)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                      {contact.fullName}
-                      <span 
-                        style={{ 
-                          fontSize: '0.7rem', 
-                          padding: '2px 8px', 
-                          borderRadius: '12px',
-                          fontWeight: 'bold',
-                          ...getSubjectBadgeStyle(contact.subject)
-                        }}
-                      >
-                        {getSubjectLabel(contact.subject)}
-                      </span>
-                    </h3>
-                    <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.3rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--charcoal-light)' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-                        {contact.email}
-                      </span>
-                      {contact.phone && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-                          {contact.phone}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <span style={{ fontSize: '0.8rem', color: 'var(--indigo-light)' }}>
-                    {new Date(contact.createdAt).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
-                </div>
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </div>
 
-                <div 
-                  style={{ 
-                    marginTop: '1rem', 
-                    paddingTop: '0.8rem', 
-                    borderTop: '1px dashed var(--indigo-pale)',
-                    color: 'var(--charcoal)',
-                    whiteSpace: selectedContact?.id === contact.id ? 'pre-wrap' : 'nowrap',
-                    overflow: selectedContact?.id === contact.id ? 'visible' : 'hidden',
-                    textOverflow: selectedContact?.id === contact.id ? 'clip' : 'ellipsis',
-                    maxHeight: selectedContact?.id === contact.id ? 'none' : '2.4rem',
-                    fontSize: '0.95rem',
-                    lineHeight: '1.5'
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--charcoal-light, #64748b)', marginRight: '4px' }}>Filter:</span>
+              {(['all', 'export', 'bulk-order', 'fabric-development', 'general'] as const).map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setSubjectFilter(filter)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: subjectFilter === filter ? 'var(--indigo-deep, #1e3a8a)' : 'var(--indigo-pale, #cbd5e1)',
+                    backgroundColor: subjectFilter === filter ? 'var(--indigo-deep, #1e3a8a)' : 'transparent',
+                    color: subjectFilter === filter ? '#ffffff' : 'var(--charcoal-light, #64748b)',
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  {contact.message}
-                </div>
+                  {filter === 'all' ? 'All Inquiries' : getSubjectLabel(filter)}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.8rem' }}>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteId(contact.id);
-                    }}
+          {/* Error Message */}
+          {error && (
+            <div style={{ padding: '1rem', backgroundColor: '#fee2e2', border: '1px solid #ef4444', color: '#b91c1c', borderRadius: '6px', marginBottom: '2rem' }}>
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {/* Contacts List */}
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--charcoal-light, #64748b)' }}>
+              <div style={{
+                display: 'inline-block',
+                width: '32px',
+                height: '32px',
+                border: '3px solid var(--indigo-pale, #cbd5e1)',
+                borderTopColor: 'var(--indigo-deep, #1e3a8a)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <p style={{ marginTop: '1rem', fontSize: '0.95rem' }}>Loading submissions from database...</p>
+            </div>
+          ) : filteredContacts.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '4rem 2rem',
+              backgroundColor: 'var(--white, #ffffff)',
+              borderRadius: '8px',
+              border: '1px dashed var(--indigo-pale, #cbd5e1)'
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--indigo-light, #94a3b8)', margin: '0 auto 1rem' }}><circle cx="12" cy="12" r="10" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
+              <h3 style={{ color: 'var(--indigo-deep, #1e3a8a)', margin: '0 0 0.5rem', fontFamily: 'var(--font-heading, serif)' }}>No Submissions Found</h3>
+              <p style={{ color: 'var(--charcoal-light, #64748b)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
+                {contacts.length === 0 
+                  ? "There are currently no customer inquiries saved in the database."
+                  : "No submissions match your active search and filter criteria."}
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {filteredContacts.map((contact) => (
+                <div 
+                  key={contact.id} 
+                  style={{
+                    backgroundColor: 'var(--white, #ffffff)',
+                    border: '1px solid var(--indigo-pale, #e2e8f0)',
+                    borderRadius: '8px',
+                    padding: '1.5rem',
+                    boxShadow: 'var(--shadow-soft)',
+                    transition: 'all 0.2s ease',
+                    position: 'relative'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--indigo-deep, #1e3a8a)', fontFamily: 'var(--font-heading, serif)' }}>
+                          {contact.fullName}
+                        </h3>
+                        <span className={`admin-badge ${getSubjectBadgeClass(contact.subject)}`}>
+                          {getSubjectLabel(contact.subject)}
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: 'var(--charcoal-light, #64748b)', marginTop: '6px' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                          <a href={`mailto:${contact.email}`} style={{ color: 'inherit', textDecoration: 'none' }}>{contact.email}</a>
+                        </span>
+                        
+                        {contact.phone && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                            <a href={`tel:${contact.phone}`} style={{ color: 'inherit', textDecoration: 'none' }}>{contact.phone}</a>
+                          </span>
+                        )}
+                        
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                          {new Date(contact.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Message Box */}
+                  <div 
+                    onClick={() => setSelectedContact(selectedContact?.id === contact.id ? null : contact)}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      background: 'none',
-                      border: 'none',
-                      color: '#dc2626',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
+                      backgroundColor: 'var(--cream, #fbf9f6)',
+                      border: '1px solid var(--indigo-pale, #e2e8f0)',
+                      borderRadius: '6px',
+                      padding: '1rem',
                       cursor: 'pointer',
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      transition: 'all 0.2s ease',
+                      fontSize: '0.9rem',
+                      color: 'var(--charcoal-deep, #334155)',
+                      lineHeight: '1.6',
+                      marginTop: '0.5rem',
+                      position: 'relative'
                     }}
-                    className="delete-btn"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      <line x1="10" y1="11" x2="10" y2="17" />
-                      <line x1="14" y1="11" x2="14" y2="17" />
-                    </svg>
-                    Delete
-                  </button>
+                    <p style={{ 
+                      margin: 0,
+                      display: '-webkit-box',
+                      WebkitLineClamp: selectedContact?.id === contact.id ? 'unset' : 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                      {contact.message}
+                    </p>
+                  </div>
 
-                  <div style={{ fontSize: '0.8rem', color: 'var(--indigo-mid)', textDecoration: 'underline' }}>
-                    {selectedContact?.id === contact.id ? 'Click to collapse message' : 'Click to read full message'}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+                    {currentUser?.canDeleteInquiries ? (
+                      <button 
+                        onClick={() => setDeleteId(contact.id)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: 'none',
+                          border: 'none',
+                          color: '#dc2626',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          transition: 'all 0.2s ease',
+                        }}
+                        className="delete-btn"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                          <line x1="10" y1="11" x2="10" y2="17" />
+                          <line x1="14" y1="11" x2="14" y2="17" />
+                        </svg>
+                        Delete
+                      </button>
+                    ) : <div />}
+
+                    <div style={{ fontSize: '0.8rem', color: 'var(--indigo-mid)', textDecoration: 'underline', cursor: 'pointer' }}
+                         onClick={() => setSelectedContact(selectedContact?.id === contact.id ? null : contact)}>
+                      {selectedContact?.id === contact.id ? 'Click to collapse message' : 'Click to read full message'}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      <style jsx global>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .delete-btn:hover {
-          background-color: rgba(220, 38, 38, 0.08) !important;
-          color: #b91c1c !important;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-      `}</style>
-    </main>
+        <style jsx global>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .delete-btn:hover {
+            background-color: rgba(220, 38, 38, 0.08) !important;
+            color: #b91c1c !important;
+          }
+        `}</style>
+      </main>
 
-    {/* ===== DELETE CONFIRMATION MODAL ===== */}
-    {deleteId !== null && (
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(11, 36, 71, 0.5)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 9999,
-        animation: 'fadeIn 0.25s ease'
-      }}>
+      {/* ===== DELETE CONFIRMATION MODAL ===== */}
+      {deleteId !== null && (
         <div style={{
-          backgroundColor: 'var(--white, #ffffff)',
-          borderRadius: '12px',
-          border: '1px solid var(--indigo-pale, #e2e8f0)',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          width: '90%',
-          maxWidth: '440px',
-          padding: '2.2rem 2rem',
-          textAlign: 'center'
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(11, 36, 71, 0.5)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.25s ease'
         }}>
           <div style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            backgroundColor: '#fee2e2',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1.5rem',
-            color: '#ef4444'
+            backgroundColor: 'var(--white, #ffffff)',
+            borderRadius: '12px',
+            border: '1px solid var(--indigo-pale, #e2e8f0)',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            width: '90%',
+            maxWidth: '440px',
+            padding: '2.2rem 2rem',
+            textAlign: 'center'
           }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
-          </div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--indigo-deep, #0b2447)', marginBottom: '0.75rem', fontFamily: 'var(--font-heading, serif)' }}>
-            Confirm Delete
-          </h3>
-          <p style={{ color: 'var(--charcoal-light, #64748b)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '2rem' }}>
-            Are you sure you want to delete this contact submission? This action will permanently remove this record from your database and cannot be undone.
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button 
-              onClick={() => setDeleteId(null)}
-              disabled={isDeleting}
-              className="btn btn-outline-dark"
-              style={{
-                height: '42px',
-                padding: '0 20px',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleDeleteSubmit}
-              disabled={isDeleting}
-              className="btn btn-primary"
-              style={{
-                height: '42px',
-                padding: '0 20px',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                backgroundColor: '#dc2626',
-                borderColor: '#dc2626',
-                color: '#ffffff',
-                cursor: 'pointer',
-                opacity: isDeleting ? 0.7 : 1
-              }}
-            >
-              {isDeleting ? 'Deleting...' : 'Yes, Delete'}
-            </button>
+            <div style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: '#fee2e2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              color: '#ef4444'
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--indigo-deep, #0b2447)', marginBottom: '0.75rem', fontFamily: 'var(--font-heading, serif)' }}>
+              Confirm Delete
+            </h3>
+            <p style={{ color: 'var(--charcoal-light, #64748b)', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+              Are you sure you want to delete this contact submission? This action will permanently remove this record from your database and cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => setDeleteId(null)}
+                disabled={isDeleting}
+                className="btn btn-outline-dark"
+                style={{ height: '42px', padding: '0 20px', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDeleteSubmit}
+                disabled={isDeleting}
+                className="btn btn-primary"
+                style={{
+                  height: '42px',
+                  padding: '0 20px',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  backgroundColor: '#dc2626',
+                  borderColor: '#dc2626',
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  opacity: isDeleting ? 0.7 : 1
+                }}
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }

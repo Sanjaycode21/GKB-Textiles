@@ -79,11 +79,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
     ],
     apple: [
-      { url: '/icon.png', type: 'image/png' },
+      { url: '/apple-touch-icon.png', type: 'image/png', sizes: '180x180' },
     ],
   },
   verification: {
@@ -158,7 +158,6 @@ export default function RootLayout({
         <meta name="twitter:image" content="https://gkbtextiles.vercel.app/og-image.jpg" />
 
         <link rel="image_src" href="https://gkbtextiles.vercel.app/og-image.jpg" />
-        <link rel="apple-touch-icon" href="https://gkbtextiles.vercel.app/og-square.jpg" />
 
         <script
           type="application/ld+json"

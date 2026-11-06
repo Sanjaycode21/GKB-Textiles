@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -25,6 +25,41 @@ interface AdminNavProps {
 export default function AdminNav({ currentUser }: AdminNavProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  // Instant local user cache so navigation links and user info render immediately without buffering
+  const [activeUser, setActiveUser] = useState<AdminUser | null>(() => {
+    if (currentUser) return currentUser;
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('gkb_admin_user');
+        if (cached) return JSON.parse(cached);
+      } catch {}
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      setActiveUser(currentUser);
+      try {
+        localStorage.setItem('gkb_admin_user', JSON.stringify(currentUser));
+      } catch {}
+    } else if (!activeUser) {
+      fetch('/api/admin/auth/me')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.user) {
+            setActiveUser(data.user);
+            try {
+              localStorage.setItem('gkb_admin_user', JSON.stringify(data.user));
+            } catch {}
+          }
+        })
+        .catch(() => {});
+    }
+  }, [currentUser, activeUser]);
+
+  const user = currentUser || activeUser;
 
   // Change password modal state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -80,6 +115,9 @@ export default function AdminNav({ currentUser }: AdminNavProps) {
 
   const handleLogout = async () => {
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('gkb_admin_user');
+      }
       await fetch('/api/admin/auth/logout', { method: 'POST' });
     } catch {}
     router.push('/admin/login');
@@ -99,7 +137,7 @@ export default function AdminNav({ currentUser }: AdminNavProps) {
     }
   };
 
-  const badge = getRoleBadge(currentUser?.role);
+  const badge = getRoleBadge(user?.role);
 
   return (
     <header style={{
@@ -161,7 +199,7 @@ export default function AdminNav({ currentUser }: AdminNavProps) {
               Inquiries
             </Link>
 
-            {currentUser?.canManageUsers && (
+            {user?.canManageUsers && (
               <Link 
                 href="/admin/users"
                 style={{
@@ -179,7 +217,7 @@ export default function AdminNav({ currentUser }: AdminNavProps) {
               </Link>
             )}
 
-            {currentUser?.canViewAuditLogs && (
+            {user?.canViewAuditLogs && (
               <Link 
                 href="/admin/audit-logs"
                 style={{
@@ -201,11 +239,11 @@ export default function AdminNav({ currentUser }: AdminNavProps) {
 
         {/* User Info & Logout */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {currentUser && (
+          {user && (
             <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0b2447' }}>
-                  {currentUser.name}
+                  {user.name}
                 </span>
                 <span style={{
                   fontSize: '0.7rem',
@@ -220,7 +258,7 @@ export default function AdminNav({ currentUser }: AdminNavProps) {
                 </span>
               </div>
               <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                {currentUser.email}
+                {user.email}
               </span>
             </div>
           )}

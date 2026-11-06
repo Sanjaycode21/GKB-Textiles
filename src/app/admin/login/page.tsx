@@ -44,6 +44,11 @@ function LoginForm() {
       }
 
       // Successful login
+      if (data.user) {
+        try {
+          localStorage.setItem('gkb_admin_user', JSON.stringify(data.user));
+        } catch {}
+      }
       router.push(from);
       router.refresh();
     } catch (err: any) {
@@ -70,6 +75,11 @@ function LoginForm() {
         throw new Error(data.error || 'Failed to verify authentication code.');
       }
 
+      if (data.user) {
+        try {
+          localStorage.setItem('gkb_admin_user', JSON.stringify(data.user));
+        } catch {}
+      }
       router.push(from);
       router.refresh();
     } catch (err: any) {
